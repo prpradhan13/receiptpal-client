@@ -7,6 +7,8 @@ import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import "react-native-reanimated";
 import ConvexClerkProvidder from "../providers/ConvexClerkProvider";
+import { useAuth } from "@clerk/clerk-expo";
+import { ActivityIndicator, View } from "react-native";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -28,13 +30,32 @@ export default function RootLayout() {
 
   return (
     <ConvexClerkProvidder>
-      <ThemeProvider value={DarkTheme}>
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="+not-found" />
-        </Stack>
-        <StatusBar style="auto" />
-      </ThemeProvider>
+      <Layout />
     </ConvexClerkProvidder>
   );
 }
+
+const Layout = () => {
+  const { isLoaded } = useAuth();
+
+  if (!isLoaded) {
+    return (
+      <ThemeProvider value={DarkTheme}>
+        <View className="flex-1 justify-center items-center bg-black">
+          <ActivityIndicator size={"large"} color={"#fff"} />
+        </View>
+        <StatusBar style="light" />
+      </ThemeProvider>
+    );
+  }
+
+  return (
+    <ThemeProvider value={DarkTheme}>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="+not-found" />
+      </Stack>
+      <StatusBar style="light" />
+    </ThemeProvider>
+  );
+};

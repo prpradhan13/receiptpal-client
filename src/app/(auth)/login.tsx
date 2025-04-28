@@ -1,5 +1,5 @@
-import { View, Text, TextInput, TouchableOpacity } from "react-native";
-import React from "react";
+import { View, Text, TextInput, TouchableOpacity, ActivityIndicator } from "react-native";
+import React, { useState } from "react";
 import { useSignIn } from "@clerk/clerk-expo";
 import { Link, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -7,14 +7,17 @@ import { SafeAreaView } from "react-native-safe-area-context";
 const LoginScreen = () => {
   const { signIn, setActive, isLoaded } = useSignIn();
   const router = useRouter();
+  
+  const [loginLoading, setLoginLoading]= useState(false);
 
-  const [emailAddress, setEmailAddress] = React.useState("");
-  const [password, setPassword] = React.useState("");
+  const [emailAddress, setEmailAddress] = useState("");
+  const [password, setPassword] = useState("");
 
   const onSignInPress = async () => {
     if (!isLoaded) return;
 
     try {
+      setLoginLoading(true);
       const signInAttempt = await signIn.create({
         identifier: emailAddress,
         password,
@@ -28,12 +31,22 @@ const LoginScreen = () => {
       }
     } catch (err) {
       console.error(JSON.stringify(err, null, 2));
+    } finally {
+      setLoginLoading(false);
     }
   };
 
+  if (!isLoaded) {
+    return (
+      <View className="flex-1 justify-center items-center">
+        <ActivityIndicator color={"#fff"} size={"large"}/>
+      </View>
+    )
+  }
+
   return (
-    <SafeAreaView className="flex-1 p-4 items-center">
-      <Text className="text-white font-bold text-xl mb-6">Login</Text>
+    <SafeAreaView className="flex-1 p-4 items-center justify-center">
+      <Text className="text-white font-bold text-3xl mb-6">Login</Text>
       <View className="w-full">
         {/* Email Input */}
         <TextInput
@@ -59,7 +72,14 @@ const LoginScreen = () => {
           onPress={onSignInPress}
           className="bg-white p-2 rounded-xl items-center"
         >
-          <Text className="text-lg font-medium">Login</Text>
+          {loginLoading ? (
+            <View className="flex-row gap-2 items-center">
+              <ActivityIndicator color={"#000"} size={22} />
+              <Text className="text-lg font-medium">Please wait...</Text>
+            </View>
+          ): (
+            <Text className="text-lg font-medium">Login</Text>
+          )}
         </TouchableOpacity>
       </View>
 
