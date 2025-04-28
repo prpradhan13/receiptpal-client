@@ -11,7 +11,7 @@ export default defineSchema({
 
   receipts: defineTable({
     userId: v.id("users"),
-    imageUrl: v.optional(v.string()),
+    imageStorageId: v.id("_storage"),
     extractedText: v.string(),
     uploadedAt: v.number(),
   }).index("by_user_id", ["userId"]),

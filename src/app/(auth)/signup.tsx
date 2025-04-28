@@ -73,7 +73,7 @@ const SignUpScreen = () => {
 
       if (signUpAttempt.status === "complete") {
         await setActive({ session: signUpAttempt.createdSessionId });
-        router.replace("/(tabs)");
+        router.replace("/(main)");
       } else {
         console.error(JSON.stringify(signUpAttempt, null, 2));
       }

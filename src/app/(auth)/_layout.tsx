@@ -1,20 +1,20 @@
-import React from 'react'
-import { Redirect, Stack } from 'expo-router'
-import { useAuth } from '@clerk/clerk-expo'
+import React from "react";
+import { Redirect, Stack } from "expo-router";
+import { useAuth } from "@clerk/clerk-expo";
 
 const AuthLayout = () => {
-    const { isSignedIn } = useAuth();
+  const { isSignedIn } = useAuth();
 
-    if (isSignedIn) {
-        return <Redirect href={'/(tabs)'} />
-    }
+  if (isSignedIn) {
+    return <Redirect href={"/(main)"} />;
+  }
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name='login' />
-        <Stack.Screen name='signup' />
+      <Stack.Screen name="login" />
+      <Stack.Screen name="signup" />
     </Stack>
-  )
-}
+  );
+};
 
-export default AuthLayout
+export default AuthLayout;

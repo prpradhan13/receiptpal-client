@@ -2,9 +2,10 @@ import React from "react";
 import { Redirect, Tabs } from "expo-router";
 import Feather from "@expo/vector-icons/Feather";
 import { useAuth } from "@clerk/clerk-expo";
+import { useAuthContext } from "@/src/context/AuthProvider";
 
 const TabLayout = () => {
-  const { isSignedIn } = useAuth();
+  const { isSignedIn, userId: clerkUserId } = useAuth();
 
   if (!isSignedIn) {
     return <Redirect href={"/(auth)/login"} />;
