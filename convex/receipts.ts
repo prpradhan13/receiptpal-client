@@ -1,7 +1,6 @@
 import { mutation, action } from "./_generated/server";
 import { v } from "convex/values";
-import Tesseract from "tesseract.js";
-import { arrayBufferToBase64 } from "../src/utils/helpingFunc"
+import { arrayBufferToBase64, cleanGeminiResponse } from "../src/utils/helpingFunc";
 
 export const createReceipt = mutation({
   args: {
@@ -26,29 +25,99 @@ export const extractTextFromImage = action({
   },
   handler: async (ctx, { storageId }) => {
     const imageUrl = await ctx.storage.getUrl(storageId);
-    
+
     if (!imageUrl) {
       throw new Error("Image URL could not be generated.");
     }
-    
+
     // Fetch image yourself
     const imageResponse = await fetch(imageUrl);
     const arrayBuffer = await imageResponse.arrayBuffer();
     const base64 = arrayBufferToBase64(arrayBuffer);
 
-    const ocrFetch = await fetch("https://c9d7-106-215-149-87.ngrok-free.app/ocr", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ imageUrl: base64 })
-    });
-    
-    const extractText = await ocrFetch.json();    
-    if (!extractText?.text) {
+    const ocrFetch = await fetch(
+      "https://5c51-106-215-149-87.ngrok-free.app/ocr",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ imageUrl: base64 }),
+      }
+    );
+
+    const extractText = await ocrFetch.json();
+
+    if (!extractText) {
       throw new Error(`OCR failed: ${extractText.error || "Unknown error"}`);
     }
 
-    return { text: extractText?.text?.trim() };
+    return { text: extractText.text.trim() };
+  },
+});
+
+export const generateReceiptDetails = action({
+  args: {
+    extractedText: v.string(),
+  },
+  handler: async (ctx, { extractedText }) => {
+    const geminiKey = process.env.GEMINI_API_KEY;
+
+    if (!geminiKey) {
+      throw new Error("Missing GEMINI_API_KEY environment variable");
+    }
+    
+    const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + process.env.GEMINI_API_KEY, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [
+              {
+                text: `Extract structured receipt data from this text:\n\n"${extractedText}".\n\nReturn a JSON array like this:\n[{"itemName": "...", "quantity": "...", "price": ..., "total": ..., "category": "..."}]`,
+              },
+            ],
+          },
+        ],
+      }),
+    });
+
+    const json = await response.json();
+    if (!json.candidates || json.candidates.length === 0) {
+      throw new Error("Gemini response invalid or empty.");
+    }
+
+    const content = cleanGeminiResponse(json.candidates[0].content.parts[0].text);
+
+    const items = JSON.parse(content);
+    
+    return { items };
+  },
+});
+
+export const saveExtractedData = mutation({
+  args: {
+    receiptId: v.id("receipts"),
+    items: v.array(
+      v.object({
+        itemName: v.string(),
+        quantity: v.string(),
+        price: v.number(),
+        total: v.number(),
+        category: v.string(),
+      })
+    ),
+  },
+  handler: async (ctx, { receiptId, items }) => {
+    for (const item of items) {
+      await ctx.db.insert("extracted_data", {
+        receiptId,
+        ...item,
+      });
+    }
+    return { success: true };
   },
 });

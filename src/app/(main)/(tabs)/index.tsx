@@ -1,4 +1,4 @@
-import { Button, Text, TouchableOpacity } from "react-native";
+import { ActivityIndicator, Button, Text, TouchableOpacity } from "react-native";
 import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useClerk, useAuth } from "@clerk/clerk-expo";
@@ -7,7 +7,7 @@ import { useUploadReceipt } from "@/src/hooks/useUploadReceipt";
 const HomeScreen = () => {
   const { signOut } = useClerk();
   const { userId } = useAuth();
-  const { uploadReceipt } = useUploadReceipt();
+  const { uploadReceipt, isUploading } = useUploadReceipt();
 
   const handleSignOut = async () => {
     try {
@@ -36,7 +36,13 @@ const HomeScreen = () => {
         <Text>Sign out</Text>
       </TouchableOpacity>
 
-      <Button title="Upload Receipt" onPress={handleUpload} />
+      <TouchableOpacity onPress={handleUpload} className="bg-white w-36 p-2 justify-center items-center rounded-xl">
+        {isUploading ? (
+          <ActivityIndicator color={"#000"} size={22} />
+        ) : (
+          <Text className="font-medium text-lg">Upload Receipt</Text>
+        )}
+      </TouchableOpacity>
     </SafeAreaView>
   );
 };

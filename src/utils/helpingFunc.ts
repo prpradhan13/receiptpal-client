@@ -6,3 +6,12 @@ export const arrayBufferToBase64 = (arrayBuffer: ArrayBuffer) => {
     }
     return btoa(binary);
 }
+
+export function cleanGeminiResponse(raw: string): string {
+  let cleaned = raw.replace(/```json/g, "").replace(/```/g, "").trim();
+  const firstBracketIndex = cleaned.indexOf("[");
+  if (firstBracketIndex > 0) {
+    cleaned = cleaned.slice(firstBracketIndex);
+  }
+  return cleaned;
+}

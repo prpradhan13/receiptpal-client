@@ -25,7 +25,7 @@ const LoginScreen = () => {
 
       if (signInAttempt.status === "complete") {
         await setActive({ session: signInAttempt.createdSessionId });
-        router.replace("/(main)");
+        router.replace("/(main)/(tabs)");
       } else {
         console.error(JSON.stringify(signInAttempt, null, 2));
       }
