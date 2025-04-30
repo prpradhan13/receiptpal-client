@@ -7,6 +7,7 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import Feather from "@expo/vector-icons/Feather";
 import CategoryItems from "@/src/components/expenses/CategoryItems";
+import BalanceDetails from "@/src/components/expenses/BalanceDetails";
 
 interface TCategoryItems {
   itemName: string;
@@ -73,19 +74,21 @@ const ExpenseDetailsScreen = () => {
         >
           <Feather name="chevron-left" color={"#000"} size={24} />
         </Pressable>
+        <Pressable
+          className="bg-white p-2 rounded-xl"
+        >
+          <Feather name="calendar" color={"#000"} size={24} />
+        </Pressable>
       </View>
 
-      <ScrollView>
-        <View className="mt-4">
-          <Text className="text-xl font-bold text-white">
-            Total Entry 50000
-          </Text>
-          <Text className="text-xl font-bold text-white">
-            Total Spend {totalSpend}
-          </Text>
-        </View>
+      <ScrollView className="mt-8">
+        <BalanceDetails totalSpend={totalSpend} />
 
-        <View className="mt-4 gap-2">{groupedArray.map((c, index) => <CategoryItems key={index} category={c.category} items={c.items} />)}</View>
+        <View className="mt-6 gap-2">
+          {groupedArray.map((c, index) => (
+            <CategoryItems key={index} category={c.category} items={c.items} />
+          ))}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );

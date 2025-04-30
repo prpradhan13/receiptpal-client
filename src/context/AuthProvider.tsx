@@ -1,19 +1,21 @@
-import { useContext, createContext, useEffect, useState } from "react";
+import { useContext, createContext, useEffect, useState, useMemo } from "react";
 import { useUser } from "@clerk/clerk-expo";
 import { api } from "../../convex/_generated/api";
 import { useQuery } from "convex/react";
 import { Id } from "../../convex/_generated/dataModel";
-import { UserType } from "@/src/types/auth.type";
+import { UserBalance, UserType } from "@/src/types/auth.type";
 
 type AuthContextType = {
   userId: Id<"users"> | null;
   user: UserType | null;
+  userBalance: UserBalance | null;
   isLoading: boolean;
 };
 
 const AuthContext = createContext<AuthContextType>({
   userId: null,
   user: null,
+  userBalance: null,
   isLoading: true,
 });
 
@@ -36,13 +38,22 @@ export default function AuthProvider({
     }
   }, [convexUser]);
 
+  const userBalance = useQuery(
+    api.users.getUserMonthlyBalance,
+    userId ? { userId } : "skip"
+  );
+
+  const value = useMemo(() => ({
+    userId,
+    user: convexUser ?? null,
+    userBalance: userBalance ?? null,
+    isLoading: !convexUser && clerkUser !== undefined,
+  }), [userId, convexUser, userBalance, clerkUser]);
+  
+
   return (
     <AuthContext.Provider
-      value={{
-        userId,
-        user: convexUser ?? null,
-        isLoading: !convexUser && !!isSignedIn,
-      }}
+      value={value}
     >
       {children}
     </AuthContext.Provider>

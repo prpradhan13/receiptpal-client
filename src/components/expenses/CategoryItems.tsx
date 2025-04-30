@@ -1,8 +1,20 @@
-import { View, Text, Pressable } from "react-native";
+import { View, Text } from "react-native";
 import React, { useState } from "react";
 import Feather from "@expo/vector-icons/Feather";
-import Animated, { FadeInDown } from "react-native-reanimated";
-import { _entering, _exiting, _layout, AnimatedPressable } from "@/src/constants/Animation";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+} from "react-native-reanimated";
+import {
+  _entering,
+  _exiting,
+  _layout,
+  AnimatedPressable,
+} from "@/src/constants/Animation";
+import { categoryColorMap } from "@/src/constants/Colors";
+import { useEffect } from "react";
+import { useAuthContext } from "@/src/context/AuthProvider";
 
 interface TCategoryItems {
   category: string;
@@ -15,6 +27,28 @@ interface TCategoryItems {
 
 const CategoryItems = ({ category, items }: TCategoryItems) => {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const { userBalance } = useAuthContext();
+  const totalBalance = userBalance?.balance ?? 0;
+
+  const isOpen = expanded[category];
+  const progress = useSharedValue(0);
+  const opacity = useSharedValue(isOpen ? 0 : 1);
+
+  const categoryTotal = items.reduce((sum, item) => sum + (item.price || 0), 0);
+  const percentUsed = Math.min((categoryTotal / totalBalance) * 100, 100);
+  const categoryColor = categoryColorMap[category] || "#6b7280";
+
+  useEffect(() => {
+    progress.value = withTiming(percentUsed, { duration: 600 });
+    opacity.value = withTiming(isOpen ? 0 : 1, { duration: 300 });
+  }, [isOpen]);
+
+  const animatedBarStyle = useAnimatedStyle(() => {
+    return {
+      width: `${progress.value}%`,
+      opacity: opacity.value,
+    };
+  });
 
   const toggleCategory = (category: string) => {
     setExpanded((prev) => ({
@@ -23,11 +57,20 @@ const CategoryItems = ({ category, items }: TCategoryItems) => {
     }));
   };
 
-  const isOpen = expanded[category];
-  const categoryTotal = items.reduce((sum, item) => sum + (item.price || 0), 0);
-
   return (
-    <Animated.View layout={_layout} className="mb-3">
+    <Animated.View
+      layout={_layout}
+      className="mb-3 rounded-xl overflow-hidden p-3"
+    >
+      {!isOpen && (
+        <View className="absolute left-0 right-0 top-0 bottom-0 bg-white/10">
+          <Animated.View
+            style={[{ backgroundColor: categoryColor }, animatedBarStyle]}
+            className="h-full opacity-30"
+          />
+        </View>
+      )}
+
       <AnimatedPressable
         layout={_layout}
         className="flex-row justify-between items-center"
@@ -48,7 +91,7 @@ const CategoryItems = ({ category, items }: TCategoryItems) => {
       </AnimatedPressable>
 
       {isOpen && (
-        <Animated.View 
+        <Animated.View
           entering={_entering}
           layout={_layout}
           className="pl-6 mt-2 gap-1"

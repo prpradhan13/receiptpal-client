@@ -37,4 +37,23 @@ export const getUserByClerkId = query({
 
     return userData;
   }
+});
+
+export const getUserMonthlyBalance = query({
+  args: {
+    userId: v.id("users")
+  },
+  handler: async (ctx, { userId }) => {
+    const userBalance = await ctx.db
+      .query("userMonthlyBalance")
+      .filter((q) => q.eq(q.field("userId"), userId))
+      .first();
+    
+      if (!userBalance) {
+        console.error("User not found!");
+        return;
+      };
+
+    return userBalance;
+  }
 })

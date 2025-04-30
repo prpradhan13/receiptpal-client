@@ -9,6 +9,11 @@ export default defineSchema({
     clerkId: v.string(),
   }).index("by_clerk_id", ["clerkId"]),
 
+  userMonthlyBalance: defineTable({
+    userId: v.id("users"),
+    balance: v.number(),
+  }).index("by_user_id", ["userId"]),
+
   receipts: defineTable({
     userId: v.id("users"),
     imageStorageId: v.id("_storage"),
