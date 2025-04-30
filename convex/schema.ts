@@ -18,10 +18,22 @@ export default defineSchema({
 
   extracted_data: defineTable({
     receiptId: v.id("receipts"),
+    userId: v.id("users"),
     category: v.string(),
     itemName: v.string(),
     quantity: v.string(),
     price: v.number(),
     total: v.number(),
-  }).index("by_receipt_id", ["receiptId"]),
+  }).index("by_user_id", ["userId"]),
+
+  manual_expenses: defineTable({
+    userId: v.id("users"),
+    category: v.string(),
+    itemName: v.string(),
+    quantity: v.optional(v.string()),
+    price: v.number(),
+    total: v.number(),
+    purchasedAt: v.number(),
+    notes: v.optional(v.string()),
+  }).index("by_user_id", ["userId"]),
 });

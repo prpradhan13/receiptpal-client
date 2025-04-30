@@ -2,10 +2,10 @@ import React from "react";
 import { Redirect, Tabs } from "expo-router";
 import Feather from "@expo/vector-icons/Feather";
 import { useAuth } from "@clerk/clerk-expo";
-import { useAuthContext } from "@/src/context/AuthProvider";
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 
 const TabLayout = () => {
-  const { isSignedIn, userId: clerkUserId } = useAuth();
+  const { isSignedIn } = useAuth();
 
   if (!isSignedIn) {
     return <Redirect href={"/(auth)/login"} />;
@@ -20,6 +20,16 @@ const TabLayout = () => {
           tabBarLabel: "Home",
           tabBarIcon: ({ color, size }) => (
             <Feather name="home" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="expense"
+        options={{
+          headerShown: false,
+          tabBarLabel: "Expense",
+          tabBarIcon: ({ color, size }) => (
+            <FontAwesome name="rupee" size={size} color={color} />
           ),
         }}
       />

@@ -9,6 +9,7 @@ import "react-native-reanimated";
 import ConvexClerkProvidder from "../providers/ConvexClerkProvider";
 import { useAuth } from "@clerk/clerk-expo";
 import { ActivityIndicator, View } from "react-native";
+import DefaultLoader from "../components/loaders/DefaultLoader";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -41,9 +42,7 @@ const Layout = () => {
   if (!isLoaded) {
     return (
       <ThemeProvider value={DarkTheme}>
-        <View className="flex-1 justify-center items-center bg-black">
-          <ActivityIndicator size={"large"} color={"#fff"} />
-        </View>
+        <DefaultLoader />
         <StatusBar style="light" />
       </ThemeProvider>
     );
