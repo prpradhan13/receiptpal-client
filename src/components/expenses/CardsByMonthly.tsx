@@ -2,6 +2,7 @@ import { View, Text, Pressable, TouchableOpacity } from "react-native";
 import React from "react";
 import { MonthExpenseType } from "@/src/types/expense.type";
 import dayjs from "dayjs";
+import { router } from "expo-router";
 
 interface CardsByMonthlyProps {
   monthItems: MonthExpenseType;
@@ -16,7 +17,7 @@ const CardsByMonthly = ({ monthItems }: CardsByMonthlyProps) => {
     }, 0)
 
   return (
-    <TouchableOpacity className="bg-gray-800 p-3 rounded-xl w-full h-36">
+    <TouchableOpacity onPress={() => router.push(`/expenses/${monthItems.month}`)} className="bg-gray-800 p-3 rounded-xl w-full h-36">
       <Text className="text-white text-2xl font-medium">
         {dayjs(monthItems.month).format('MMMM')}
       </Text>
