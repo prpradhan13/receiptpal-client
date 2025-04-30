@@ -1,6 +1,8 @@
 import { View, Text, Pressable } from "react-native";
 import React, { useState } from "react";
 import Feather from "@expo/vector-icons/Feather";
+import Animated, { FadeInDown } from "react-native-reanimated";
+import { _entering, _exiting, _layout, AnimatedPressable } from "@/src/constants/Animation";
 
 interface TCategoryItems {
   category: string;
@@ -25,8 +27,9 @@ const CategoryItems = ({ category, items }: TCategoryItems) => {
   const categoryTotal = items.reduce((sum, item) => sum + (item.price || 0), 0);
 
   return (
-    <View key={category} className="mb-3">
-      <Pressable
+    <Animated.View layout={_layout} className="mb-3">
+      <AnimatedPressable
+        layout={_layout}
         className="flex-row justify-between items-center"
         onPress={() => toggleCategory(category)}
       >
@@ -42,10 +45,14 @@ const CategoryItems = ({ category, items }: TCategoryItems) => {
         </View>
 
         <Text className="text-white text-2xl font-medium">{categoryTotal}</Text>
-      </Pressable>
+      </AnimatedPressable>
 
       {isOpen && (
-        <View className="pl-6 mt-2 gap-1">
+        <Animated.View 
+          entering={_entering}
+          layout={_layout}
+          className="pl-6 mt-2 gap-1"
+        >
           {items.map((item, idx) => (
             <View
               key={`${item.itemName}-${idx}`}
@@ -55,9 +62,9 @@ const CategoryItems = ({ category, items }: TCategoryItems) => {
               <Text className="text-white">{item.price}</Text>
             </View>
           ))}
-        </View>
+        </Animated.View>
       )}
-    </View>
+    </Animated.View>
   );
 };
 

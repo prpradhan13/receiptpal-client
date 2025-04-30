@@ -1,6 +1,5 @@
 import { View, Text, FlatList } from "react-native";
 import React, { useMemo } from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useAuthContext } from "@/src/context/AuthProvider";
@@ -32,7 +31,7 @@ const Expense = () => {
       acc[monthKey].push(expense);
       return acc;
     }, {});
-
+    
     // Transform to array
     return Object.entries(grpObject).map(([month, expenses]) => ({
       month,

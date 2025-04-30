@@ -17,7 +17,7 @@ const CardsByMonthly = ({ monthItems }: CardsByMonthlyProps) => {
     }, 0)
 
   return (
-    <TouchableOpacity onPress={() => router.push(`/expenses/${monthItems.month}`)} className="bg-gray-800 p-3 rounded-xl w-full h-36">
+    <TouchableOpacity onPress={() => router.push(`/expenses/${monthItems.month}`)} className="bg-[#1e1e1e] mt-4 p-3 rounded-xl w-full h-36">
       <Text className="text-white text-2xl font-medium">
         {dayjs(monthItems.month).format('MMMM')}
       </Text>

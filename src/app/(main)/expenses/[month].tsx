@@ -1,16 +1,11 @@
 import { View, Text, Pressable, ScrollView } from "react-native";
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
 import { useAuthContext } from "@/src/context/AuthProvider";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import Feather from "@expo/vector-icons/Feather";
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-} from "react-native-reanimated";
 import CategoryItems from "@/src/components/expenses/CategoryItems";
 
 interface TCategoryItems {
@@ -90,7 +85,7 @@ const ExpenseDetailsScreen = () => {
           </Text>
         </View>
 
-        <View className="mt-4">{groupedArray.map((c) => <CategoryItems category={c.category} items={c.items} />)}</View>
+        <View className="mt-4 gap-2">{groupedArray.map((c, index) => <CategoryItems key={index} category={c.category} items={c.items} />)}</View>
       </ScrollView>
     </SafeAreaView>
   );
