@@ -29,6 +29,7 @@ export default defineSchema({
     quantity: v.string(),
     price: v.number(),
     total: v.number(),
+    purchasedAt: v.number(),
   }).index("by_user_id", ["userId"]),
 
   manual_expenses: defineTable({

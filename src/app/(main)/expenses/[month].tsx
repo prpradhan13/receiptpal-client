@@ -8,6 +8,7 @@ import { api } from "@/convex/_generated/api";
 import Feather from "@expo/vector-icons/Feather";
 import CategoryItems from "@/src/components/expenses/CategoryItems";
 import BalanceDetails from "@/src/components/expenses/BalanceDetails";
+import WeeklyBarChart from "@/src/components/expenses/WeeklyBarChart";
 
 interface TCategoryItems {
   itemName: string;
@@ -17,6 +18,7 @@ interface TCategoryItems {
 
 const ExpenseDetailsScreen = () => {
   const { month } = useLocalSearchParams();
+  
   const { userId } = useAuthContext();
 
   const expenseQueryData = useQuery(
@@ -65,6 +67,11 @@ const ExpenseDetailsScreen = () => {
     })
   );
 
+  const dataForWeeklyBarCart = filteredExpenses.map((e) => ({
+    price: e.price,
+    _creationTime: e._creationTime,
+  }));
+
   return (
     <SafeAreaView className="flex-1 p-4">
       <View className="flex-row justify-between">
@@ -83,6 +90,8 @@ const ExpenseDetailsScreen = () => {
 
       <ScrollView className="mt-8">
         <BalanceDetails totalSpend={totalSpend} />
+
+        <WeeklyBarChart data={dataForWeeklyBarCart} />
 
         <View className="mt-6 gap-2">
           {groupedArray.map((c, index) => (

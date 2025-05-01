@@ -1,7 +1,8 @@
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, Pressable } from "react-native";
 import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useClerk } from "@clerk/clerk-expo";
+import { router } from "expo-router";
 
 const ProfileScreen = () => {
   const { signOut } = useClerk();
@@ -19,6 +20,10 @@ const ProfileScreen = () => {
       <TouchableOpacity className="bg-white my-4" onPress={handleSignOut}>
         <Text>Sign out</Text>
       </TouchableOpacity>
+
+      <Pressable onPress={() => router.push('/createExpenseModal')} className="bg-white p-2 rounded-lg">
+        <Text>Add Expense</Text>
+      </Pressable>
     </SafeAreaView>
   );
 };

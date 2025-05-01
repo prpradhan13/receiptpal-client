@@ -1,4 +1,3 @@
-import { View, Text } from "react-native";
 import React from "react";
 import { Stack } from "expo-router";
 import AuthProvider from "@/src/context/AuthProvider";
@@ -11,6 +10,10 @@ const MainLayout = () => {
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="expenses" options={{ headerShown: false }} />
+          <Stack.Screen
+            name="createExpenseModal"
+            options={{ headerShown: false, presentation: "modal", animation: "fade_from_bottom" }}
+          />
         </Stack>
       </AuthProvider>
     </GestureHandlerRootView>

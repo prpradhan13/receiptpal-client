@@ -45,6 +45,7 @@ export function useUploadReceipt() {
         receiptId,
         userId: user?._id as Id<"users">,
         items,
+        purchasedAt: Date.now()
       });
 
       return storageId;
