@@ -12,23 +12,23 @@ dayjs.extend(isoWeek);
 interface WeeklyBarChartProps {
   data: {
     price: number;
-    _creationTime: number;
+    purchasedAt: number;
   }[];
 }
 
 const WeeklyBarChart = ({ data }: WeeklyBarChartProps) => {
-  const [weekIndex, setWeekIndex] = useState(0);
+  const [monthIndex, setMonthIndex] = useState(0);
 
-  const weeksWithData = useMemo(() => {
+  const monthsWithData = useMemo(() => {
     const map = new Map<string, typeof data>();
 
     data.forEach((item) => {
-      const timestamp = Math.floor(item._creationTime);
-      const weekStart = dayjs(timestamp).startOf("isoWeek").toISOString();
-      if (!map.has(weekStart)) {
-        map.set(weekStart, []);
+      const timestamp = Math.floor(item.purchasedAt);
+      const monthStart = dayjs(timestamp).startOf("month").toISOString();
+      if (!map.has(monthStart)) {
+        map.set(monthStart, []);
       }
-      map.get(weekStart)?.push(item);
+      map.get(monthStart)?.push(item);
     });
 
     return Array.from(map.entries()).sort(
@@ -36,37 +36,35 @@ const WeeklyBarChart = ({ data }: WeeklyBarChartProps) => {
     );
   }, [data]);
 
-  const currentWeekStart = useMemo(() => {
-    if (!weeksWithData.length) return dayjs().startOf("isoWeek");
-    return dayjs(weeksWithData[weekIndex][0]);
-  }, [weekIndex, weeksWithData]);
+  const currentMonthStart = useMemo(() => {
+    if (!monthsWithData.length) return dayjs().startOf("month");
+    return dayjs(monthsWithData[monthIndex][0]);
+  }, [monthIndex, monthsWithData]);
 
-  const currentWeekData = useMemo(() => {
-    return weeksWithData[weekIndex]?.[1] ?? [];
-  }, [weekIndex, weeksWithData]);
+  const currentMonthData = useMemo(() => {
+    return monthsWithData[monthIndex]?.[1] ?? [];
+  }, [monthIndex, monthsWithData]);
 
-  const rangeStart = currentWeekStart;
-  const rangeEnd = currentWeekStart.endOf("isoWeek");
+  const rangeStart = currentMonthStart;
+  const rangeEnd = currentMonthStart.endOf("month");
 
   const barData = useMemo(() => {
-    const dayTotals = Array(7).fill(0);
+    const dayTotals = Array(rangeEnd.date()).fill(0);
 
-    currentWeekData.forEach((item) => {
-      const index = dayjs(item._creationTime).isoWeekday() - 1;
-      dayTotals[index] += item.price;
+    currentMonthData.forEach((item) => {
+      const dayOfMonth = dayjs(item.purchasedAt).date() - 1;
+      dayTotals[dayOfMonth] += item.price;
     });
 
-    const dayLabels = ["M", "T", "W", "T", "F", "S", "S"];
-
     return dayTotals.map((value, i) => ({
-      label: dayLabels[i],
+      label: `${i + 1}`,
       value,
       frontColor: "#177AD5",
     }));
-  }, [currentWeekData]);
+  }, [currentMonthData, rangeEnd]);
 
   return (
-    <View className="bg-[#2a2a2a] p-2 rounded-xl mt-6">
+    <View className="bg-[#2a2a2a] p-2 rounded-xl">
       <Text className="text-2xl font-bold mb-4 text-white">
         {rangeStart.format("MMM D")} - {rangeEnd.format("MMM D")}
       </Text>
@@ -79,23 +77,23 @@ const WeeklyBarChart = ({ data }: WeeklyBarChartProps) => {
         data={barData}
         yAxisThickness={0}
         xAxisThickness={0}
-        xAxisLabelTextStyle={{ color: '#fff' }}
-        yAxisTextStyle={{ color: '#fff' }}
+        xAxisLabelTextStyle={{ color: "#fff" }}
+        yAxisTextStyle={{ color: "#fff" }}
       />
 
       <View className="flex-row justify-between mt-4">
         <Pressable
-          onPress={() => setWeekIndex((i) => i - 1)}
-          disabled={weekIndex === 0}
-          className={`${weekIndex === 0 ? "opacity-[0.4]" : "optional-[1]"} bg-[#c2c2c2] p-1 rounded-full`}
+          onPress={() => setMonthIndex((i) => i - 1)}
+          disabled={monthIndex === 0}
+          className={`${monthIndex === 0 ? "opacity-[0.4]" : "optional-[1]"} bg-[#c2c2c2] p-1 rounded-full`}
         >
           <Feather name="chevron-left" size={24} />
         </Pressable>
 
         <Pressable
-          onPress={() => setWeekIndex((i) => i + 1)}
-          disabled={weekIndex === weeksWithData.length - 1}
-          className={`${weekIndex === weeksWithData.length - 1 ? "opacity-[0.4]" : "optional-[1]"} bg-[#c2c2c2] p-1 rounded-full`}
+          onPress={() => setMonthIndex((i) => i + 1)}
+          disabled={monthIndex === monthsWithData.length - 1}
+          className={`${monthIndex === monthsWithData.length - 1 ? "opacity-[0.4]" : "optional-[1]"} bg-[#c2c2c2] p-1 rounded-full`}
         >
           <Feather name="chevron-right" size={24} />
         </Pressable>

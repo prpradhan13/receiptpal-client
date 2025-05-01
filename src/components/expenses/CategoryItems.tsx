@@ -16,19 +16,20 @@ import { categoryColorMap } from "@/src/constants/Colors";
 import { useEffect } from "react";
 import { useAuthContext } from "@/src/context/AuthProvider";
 
-interface TCategoryItems {
+interface CategoryItemsProps {
+  month: string;
   category: string;
   items: {
     itemName: string;
     price: number;
-    _creationTime: number;
+    purchasedAt: number;
   }[];
 }
 
-const CategoryItems = ({ category, items }: TCategoryItems) => {
+const CategoryItems = ({ category, items, month }: CategoryItemsProps) => {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
-  const { userBalance } = useAuthContext();
-  const totalBalance = userBalance?.balance ?? 0;
+  const { monthlyBalance } = useAuthContext();
+  const totalBalance = month ? monthlyBalance[month] || 0 : 0
 
   const isOpen = expanded[category];
   const progress = useSharedValue(0);

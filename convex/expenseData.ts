@@ -12,10 +12,18 @@ export const getUsersAllExpenses = query({
       .query("extracted_data")
       .withIndex("by_user_id", (q) => q.eq("userId", userId))
       .collect();
-
     if (!receiptExpeses) throw new Error("Receipt Expenses can not find!");
 
-    return receiptExpeses;
+    const manualExpenses = await ctx.db
+      .query("manual_expenses")
+      .withIndex("by_user_id")
+      .collect();
+
+    if (!manualExpenses) throw new Error("Manual Expenses can not find!");
+
+    const userAllExpenses = [...manualExpenses, ...receiptExpeses]
+
+    return userAllExpenses;
   },
 });
 

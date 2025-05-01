@@ -9,16 +9,10 @@ import Feather from "@expo/vector-icons/Feather";
 import CategoryItems from "@/src/components/expenses/CategoryItems";
 import BalanceDetails from "@/src/components/expenses/BalanceDetails";
 import WeeklyBarChart from "@/src/components/expenses/WeeklyBarChart";
-
-interface TCategoryItems {
-  itemName: string;
-  price: number;
-  _creationTime: number;
-}
+import { TCategoryItems } from "@/src/types/expense.type";
 
 const ExpenseDetailsScreen = () => {
-  const { month } = useLocalSearchParams();
-  
+  const { month } = useLocalSearchParams<{ month: string }>();
   const { userId } = useAuthContext();
 
   const expenseQueryData = useQuery(
@@ -89,13 +83,13 @@ const ExpenseDetailsScreen = () => {
       </View>
 
       <ScrollView className="mt-8">
-        <BalanceDetails totalSpend={totalSpend} />
+        <BalanceDetails totalSpend={totalSpend} month={month} />
 
         <WeeklyBarChart data={dataForWeeklyBarCart} />
 
         <View className="mt-6 gap-2">
           {groupedArray.map((c, index) => (
-            <CategoryItems key={index} category={c.category} items={c.items} />
+            <CategoryItems key={index} category={c.category} items={c.items} month={month} />
           ))}
         </View>
       </ScrollView>

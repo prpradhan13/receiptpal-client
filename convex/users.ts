@@ -47,7 +47,7 @@ export const getUserMonthlyBalance = query({
     const userBalance = await ctx.db
       .query("userMonthlyBalance")
       .filter((q) => q.eq(q.field("userId"), userId))
-      .first();
+      .collect()
     
       if (!userBalance) {
         console.error("User not found!");

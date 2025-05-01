@@ -11,9 +11,7 @@ interface CardsByMonthlyProps {
 const CardsByMonthly = ({ monthItems }: CardsByMonthlyProps) => {
 
     const totalMoneySpend = monthItems.expenses.reduce((acc, item) => {
-        acc += item.price
-
-        return acc;
+      return  acc += item.price;
     }, 0)
 
   return (

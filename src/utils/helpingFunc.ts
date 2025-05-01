@@ -5,7 +5,7 @@ export const arrayBufferToBase64 = (arrayBuffer: ArrayBuffer) => {
       binary += String.fromCharCode(bytes[i]);
     }
     return btoa(binary);
-}
+};
 
 export function cleanGeminiResponse(raw: string): string {
   let cleaned = raw.replace(/```json/g, "").replace(/```/g, "").trim();
@@ -14,4 +14,7 @@ export function cleanGeminiResponse(raw: string): string {
     cleaned = cleaned.slice(firstBracketIndex);
   }
   return cleaned;
-}
+};
+
+export const getMonthKey = (date: Date) =>
+  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
