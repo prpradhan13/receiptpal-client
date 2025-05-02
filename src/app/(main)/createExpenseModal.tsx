@@ -6,7 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Feather from "@expo/vector-icons/Feather";
 import { useForm, Controller } from "react-hook-form";
@@ -16,23 +16,34 @@ import {
 } from "@/src/validation/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { router } from "expo-router";
-import { categoryColorMap } from "@/src/constants/Colors";
+import { categoryColorMap, categoryData } from "@/src/constants/Colors";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useAuthContext } from "@/src/context/AuthProvider";
 import { Id } from "@/convex/_generated/dataModel";
+import {
+  _entering,
+  _exiting,
+  _layout,
+  AnimatedPressable,
+} from "@/src/constants/Animation";
 
-const categories = Object.keys(categoryColorMap);
+const categoryMap = Object.fromEntries(
+  categoryData.map((cat) => [cat.cName, cat])
+);
 
 const CreateExpenseModal = () => {
   const { user } = useAuthContext();
   const userId = user?._id;
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedCategoryData, setSelectedCategoryData] = useState<
+    (typeof categoryData)[0] | null
+  >(null);
   const [openCategoryBox, setOpenCategoryBox] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
 
-  const createExpense = useMutation(api.expenseData.createExpense)
+  const createExpense = useMutation(api.expenseData.createExpense);
 
   const {
     control,
@@ -41,6 +52,7 @@ const CreateExpenseModal = () => {
     getValues,
     handleSubmit,
     setValue,
+    watch,
   } = useForm<TCreateExpenseSchema>({
     resolver: zodResolver(createExpenseSchema),
     defaultValues: {
@@ -49,7 +61,7 @@ const CreateExpenseModal = () => {
       quantity: "",
       price: 0,
       purchasedAt: "",
-      notes: ""
+      notes: "",
     },
   });
 
@@ -59,10 +71,16 @@ const CreateExpenseModal = () => {
     }
   }, [selectedCategory]);
 
-  const handleSelectCategory = (category: string) => {
-    setSelectedCategory(category);
+  const handleSelectCategory = (categoryName: string) => {
+    const data = categoryMap[categoryName];
+    setSelectedCategory(categoryName);
+    setSelectedCategoryData(data);
     setOpenCategoryBox(false);
   };
+
+  const watchedPrice = watch("price");
+  const watchedQuantity = watch("quantity");
+  const total = (parseFloat(watchedQuantity || "1") || 1) * (watchedPrice || 0);
 
   const handleSave = async (data: TCreateExpenseSchema) => {
     if (!userId) {
@@ -112,48 +130,157 @@ const CreateExpenseModal = () => {
         </Pressable>
       </View>
 
-      <Text className="text-white font-bold text-3xl mt-6 mb-4">
-        Create Expense
-      </Text>
-
-      <ScrollView className="">
-        {/* Category Selector */}
-        <View>
-          <Text className="text-white text-xl">Category</Text>
-          <View className="relative">
-            <Pressable
-              onPress={() => setOpenCategoryBox(true)}
-              className="bg-[#3d3d3d] rounded-xl px-4 py-3"
+      <ScrollView className="mt-5">
+        <View className="flex-row items-center justify-between w-full">
+          <View className="w-[48.5%] relative">
+            <AnimatedPressable
+              layout={_layout}
+              onPress={() => setOpenCategoryBox((prev) => !prev)}
+              className="rounded-2xl p-4"
+              style={{
+                backgroundColor: selectedCategoryData?.color || "#3d3d3d",
+              }}
             >
-              <Text className="text-white capitalize">
-                {selectedCategory || "Select one"}
-              </Text>
-            </Pressable>
+              <View className="flex-row justify-between items-center">
+                <View className="flex-row items-center gap-2">
+                  {selectedCategoryData?.iconComponent &&
+                    React.createElement(selectedCategoryData.iconComponent, {
+                      ...selectedCategoryData.iconProps,
+                      name: selectedCategoryData.iconProps.name as any,
+                    })}
+                  <Text className="text-white capitalize text-lg font-medium">
+                    {selectedCategory || "Select one"}
+                  </Text>
+                </View>
+                <Feather name="chevron-down" size={24} color={"#fff"} />
+              </View>
+            </AnimatedPressable>
 
             {openCategoryBox && (
-              <View className="bg-[#c2c2c2] w-52 p-3 rounded-xl absolute z-50 top-12 gap-2">
-                {categories.map((cat) => (
-                  <Pressable
-                    key={cat}
-                    onPress={() => handleSelectCategory(cat)}
-                    className={`px-3 py-2 rounded-xl ${selectedCategory === cat ? "border-2 border-white" : ""}`}
-                    style={{ backgroundColor: categoryColorMap[cat] }}
-                  >
-                    <Text className="text-black font-semibold capitalize">
-                      {cat}
-                    </Text>
-                  </Pressable>
-                ))}
+              <View className="absolute top-full left-0 w-full mt-2 z-20 bg-white rounded-xl overflow-hidden">
+                {categoryData.map((cat) => {
+                  const IconComponent = cat.iconComponent;
+                  return (
+                    <AnimatedPressable
+                      entering={_entering}
+                      layout={_layout}
+                      key={cat.cName}
+                      onPress={() => handleSelectCategory(cat.cName)}
+                      className={`px-3 py-2 flex-row items-center gap-2 ${
+                        selectedCategory === cat.cName
+                          ? "bg-gray-200"
+                          : "bg-white"
+                      }`}
+                    >
+                      {IconComponent && (
+                        <IconComponent
+                          {...cat.iconProps}
+                          name={cat.iconProps?.name as any}
+                        />
+                      )}
+                      <Text className="text-black font-semibold capitalize">
+                        {cat.cName}
+                      </Text>
+                    </AnimatedPressable>
+                  );
+                })}
               </View>
             )}
+
             {errors.category && (
               <Text className="text-red-500">{errors.category.message}</Text>
             )}
           </View>
+
+          <Pressable
+            onPress={() => setShowDatePicker(true)}
+            className="w-[48.5%] rounded-2xl p-4 bg-[#3d3d3d]"
+          >
+            <Controller
+              control={control}
+              name="purchasedAt"
+              render={({ field: { value, onChange } }) => {
+                const handleDateChange = (event: any, selectedDate?: Date) => {
+                  if (event.type === "set" && selectedDate) {
+                    onChange(selectedDate.getTime().toString());
+                    setShowDatePicker(false);
+                  } else if (event.type === "dismissed") {
+                    setShowDatePicker(false);
+                  }
+                };
+
+                return (
+                  <>
+                    <View className="bg-[#3d3d3d] rounded-md flex flex-row items-center justify-between">
+                      <Text className="text-white text-lg font-medium">
+                        {value
+                          ? new Date(Number(value)).toLocaleDateString()
+                          : "Select Date"}
+                      </Text>
+                      <Feather name="calendar" size={24} color="#CFCFCF" />
+                    </View>
+
+                    {showDatePicker && (
+                      <DateTimePicker
+                        value={value ? new Date(Number(value)) : new Date()}
+                        mode="date"
+                        display="default"
+                        onChange={handleDateChange}
+                      />
+                    )}
+                  </>
+                );
+              }}
+            />
+            {errors.purchasedAt && (
+              <Text className="text-red-500">{errors.purchasedAt.message}</Text>
+            )}
+          </Pressable>
         </View>
 
-        <View>
-          <Text className="text-white text-xl">Item Name</Text>
+        <View className="flex-row items-center justify-between w-full mt-4">
+          <View className="w-[48.5%]">
+            <Text className="text-white">Quantity (Optional)</Text>
+            <Controller
+              control={control}
+              name="quantity"
+              render={({ field: { onChange, value } }) => (
+                <TextInput
+                  placeholder="Quantity (default 1)"
+                  placeholderTextColor="#9ca3af"
+                  keyboardType="numeric"
+                  value={value}
+                  onChangeText={onChange}
+                  className="bg-[#3d3d3d] text-white rounded-2xl p-4 h-14"
+                />
+              )}
+            />
+          </View>
+
+          <View className="w-[48.5%]">
+            <Text className="text-white">Price</Text>
+            <Controller
+              control={control}
+              name="price"
+              render={({ field: { onChange, value } }) => (
+                <TextInput
+                  placeholder="Price"
+                  placeholderTextColor="#9ca3af"
+                  keyboardType="numeric"
+                  value={value?.toString()}
+                  onChangeText={(text) => onChange(Number(text))}
+                  className="bg-[#3d3d3d] text-white rounded-2xl p-4 h-14"
+                />
+              )}
+            />
+            {errors.price && (
+              <Text className="text-red-500">{errors.price.message}</Text>
+            )}
+          </View>
+        </View>
+
+        <View className="mt-4">
+          <Text className="text-white">Item Name</Text>
           <Controller
             control={control}
             name="itemName"
@@ -163,7 +290,7 @@ const CreateExpenseModal = () => {
                 placeholderTextColor="#9ca3af"
                 value={value}
                 onChangeText={onChange}
-                className="bg-[#3d3d3d] rounded-xl px-4 py-3 text-white"
+                className="bg-[#3d3d3d] rounded-2xl p-4 text-white"
               />
             )}
           />
@@ -172,92 +299,14 @@ const CreateExpenseModal = () => {
           )}
         </View>
 
-        <View>
-          <Text className="text-white text-xl">Quantity (Optional)</Text>
-          <Controller
-            control={control}
-            name="quantity"
-            render={({ field: { onChange, value } }) => (
-              <TextInput
-                placeholder="Quantity (default 1)"
-                placeholderTextColor="#9ca3af"
-                keyboardType="numeric"
-                value={value}
-                onChangeText={onChange}
-                className="bg-[#3d3d3d] text-white rounded-xl px-4 py-3"
-              />
-            )}
-          />
+        <View className="mt-8 justify-center items-center">
+          <Text className="text-[#c2c2c2]">Total</Text>
+          <Text className="text-5xl text-white mt-2">
+            {total}
+          </Text>
         </View>
 
-        <View>
-          <Text className="text-white text-xl">Price</Text>
-          <Controller
-            control={control}
-            name="price"
-            render={({ field: { onChange, value } }) => (
-              <TextInput
-                placeholder="Price"
-                placeholderTextColor="#9ca3af"
-                keyboardType="numeric"
-                value={value?.toString()}
-                onChangeText={(text) => onChange(Number(text))}
-                className="bg-[#3d3d3d] text-white rounded-xl px-4 py-3"
-              />
-            )}
-          />
-          {errors.price && (
-            <Text className="text-red-500">{errors.price.message}</Text>
-          )}
-        </View>
-
-        <View>
-          <Text className="text-white text-xl">Purchased At</Text>
-          <Controller
-            control={control}
-            name="purchasedAt"
-            render={({ field: { value, onChange } }) => {
-              const handleDateChange = (event: any, selectedDate?: Date) => {
-                if (event.type === "set" && selectedDate) {
-                  onChange(selectedDate.getTime().toString()); // update form value
-                  setShowDatePicker(false);
-                } else if (event.type === "dismissed") {
-                  setShowDatePicker(false);
-                }
-              };
-
-              return (
-                <>
-                  <View className="bg-[#3d3d3d] rounded-md p-3 flex flex-row items-center justify-between mb-2">
-                    <Text className="text-white">
-                      {value
-                        ? new Date(Number(value)).toLocaleDateString()
-                        : "Select Date"}
-                    </Text>
-                    <TouchableOpacity onPress={() => setShowDatePicker(true)}>
-                      <Feather name="calendar" size={24} color="#CFCFCF" />
-                    </TouchableOpacity>
-                  </View>
-
-                  {showDatePicker && (
-                    <DateTimePicker
-                      value={value ? new Date(Number(value)) : new Date()}
-                      mode="date"
-                      display="default"
-                      onChange={handleDateChange}
-                    />
-                  )}
-                </>
-              );
-            }}
-          />
-          {errors.purchasedAt && (
-            <Text className="text-red-500">{errors.purchasedAt.message}</Text>
-          )}
-        </View>
-
-        <View>
-          <Text className="text-white text-xl">Purchased At</Text>
+        <View className="justify-center items-center">
           <Controller
             control={control}
             name="notes"
@@ -269,7 +318,7 @@ const CreateExpenseModal = () => {
                 keyboardType="numeric"
                 value={value?.toString()}
                 onChangeText={(text) => onChange(text)}
-                className="bg-[#3d3d3d] text-white rounded-xl px-4 py-3"
+                className="text-white rounded-xl px-4 py-3 text-lg" 
               />
             )}
           />

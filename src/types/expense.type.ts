@@ -1,3 +1,6 @@
+import { FieldErrors } from "react-hook-form";
+import { categoryData } from "../constants/Colors";
+
 export type ReceiptExpenseType = {
   _id: string;
   _creationTime: number;
