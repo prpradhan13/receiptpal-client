@@ -22,7 +22,7 @@ const BalanceDropdown = ({
   ];
 
   return (
-    <Animated.View entering={_entering} className="min-w-[160px] bg-white absolute top-full p-2 z-20 rounded-lg items-center">
+    <Animated.View entering={_entering} className="min-w-[160px] bg-white absolute top-full left-1/2 -translate-x-1/2 p-2 z-20 rounded-lg items-center">
       {options.map((option, index) => (
         <Pressable
           key={index}

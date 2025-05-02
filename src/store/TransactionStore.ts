@@ -11,10 +11,11 @@ export const useTransactionStore = create<UserTransactions>((set) => ({
   allExpenses: null,
   userAllTransactionAmount: 0,
   setAllExpenses: (expenses) => {
+    const sortExpense = expenses.sort((a, b) => b.purchasedAt - a.purchasedAt)
     const amount =
       expenses?.reduce((acc, transaction) => acc + transaction.total, 0) ?? 0;
     set({
-      allExpenses: expenses,
+      allExpenses: sortExpense,
       userAllTransactionAmount: amount,
     });
   },

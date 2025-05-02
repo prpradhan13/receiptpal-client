@@ -9,7 +9,7 @@ const MainLayout = () => {
       <AuthProvider>
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="expenses" options={{ headerShown: false }} />
+          <Stack.Screen name="allTransactions" options={{ title: "All Tansactions" }} />
           <Stack.Screen
             name="createExpenseModal"
             options={{ headerShown: false, presentation: "modal", animation: "fade_from_bottom" }}

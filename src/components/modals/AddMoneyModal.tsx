@@ -52,7 +52,7 @@ const AddMoneyModal = ({
   const onDateChange = (event: any, selectedDate: Date | undefined) => {
     setShowDatePicker(false);
     if (selectedDate) {
-      setSelectedDate(selectedDate); // Update the selected date
+      setSelectedDate(selectedDate);
     }
   };
 
@@ -61,6 +61,7 @@ const AddMoneyModal = ({
       visible={modalVisible}
       transparent
       onRequestClose={() => setModalVisible(false)}
+      animationType="fade"
     >
       <View className="flex-1 justify-center items-center bg-black/70">
         <View className="bg-white rounded-lg p-4 ">

@@ -2,7 +2,7 @@ import React from "react";
 import { Redirect, Tabs } from "expo-router";
 import Feather from "@expo/vector-icons/Feather";
 import { useAuth } from "@clerk/clerk-expo";
-import FontAwesome from '@expo/vector-icons/FontAwesome';
+import FontAwesome from "@expo/vector-icons/FontAwesome";
 
 const TabLayout = () => {
   const { isSignedIn } = useAuth();
@@ -12,7 +12,18 @@ const TabLayout = () => {
   }
 
   return (
-    <Tabs>
+    <Tabs
+      screenOptions={{
+        tabBarLabel: "",
+        tabBarItemStyle: {
+          justifyContent: "center",
+          alignItems: "center",
+        },
+        tabBarIconStyle: {
+          marginTop: 5, 
+        },
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{

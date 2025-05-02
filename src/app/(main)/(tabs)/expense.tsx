@@ -85,9 +85,19 @@ const Expense = () => {
   if (isLoading || (groupedExpenses.length > 0 && !selectedMonth))
     return <DefaultLoader />;
 
+  if(!expenseQueryData || expenseQueryData.length === 0) {
+    return (
+      <View className="flex-1 justify-center items-center">
+        <Text className="text-white font-medium text-xl">
+          No Transactions
+        </Text>
+      </View>
+    )
+  }
+
   return (
-    <SafeAreaView className="flex-1 p-3">
-      <ScrollView>
+    <SafeAreaView className="flex-1 px-4 pt-4">
+      <ScrollView showsVerticalScrollIndicator={false}>
         <View className="flex-row justify-between items-center mb-6">
           <Pressable onPress={() => setShowMonthPicker(true)}>
             <Text className="text-[#c2c2c2] font-semibold">

@@ -53,10 +53,10 @@ const CategoryItems = ({ category, items, month }: CategoryItemsProps) => {
     <Animated.View layout={_layout} className="mb-5 rounded-xl overflow-hidden">
       <AnimatedPressable
         layout={_layout}
-        className="flex-row justify-between"
+        className="flex-row justify-between items-center"
         onPress={() => toggleCategory(category)}
       >
-        <View className="flex-row gap-2 items-center">
+        <View className="flex-row gap-4 items-center">
           <View
             className="p-4 rounded-full"
             style={{ backgroundColor: cData[0].color }}

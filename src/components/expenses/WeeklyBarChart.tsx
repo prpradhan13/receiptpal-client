@@ -5,6 +5,7 @@ import dayjs from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
 import Feather from "@expo/vector-icons/Feather";
 import isBetween from "dayjs/plugin/isBetween";
+import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 
 dayjs.extend(isBetween);
 dayjs.extend(isoWeek);
@@ -65,7 +66,7 @@ const WeeklyBarChart = ({ data }: WeeklyBarChartProps) => {
       setMonthIndex((i) => Math.max(i - 1, 0));
     }
   };
-  
+
   const handleNext = () => {
     if (viewMode === "week") {
       setWeekOffset((i) => i + 1);
@@ -122,19 +123,20 @@ const WeeklyBarChart = ({ data }: WeeklyBarChartProps) => {
         xAxisThickness={0}
         xAxisLabelTextStyle={{ color: "#fff" }}
         yAxisTextStyle={{ color: "#fff" }}
+        showFractionalValues
       />
-
+      
       <Pressable
-        onPress={() =>
-          setViewMode((prev) => (prev === "month" ? "week" : "month"))
-        }
+        onPress={() => {
+          setViewMode((prev) => (prev === "month" ? "week" : "month"));
+          setWeekOffset(0);
+        }}
         className="absolute right-4 top-4 bg-white px-3 py-1 rounded-full"
       >
         <Text className="text-black font-semibold">
           {viewMode === "month" ? "View Week" : "View Month"}
         </Text>
       </Pressable>
-
       {viewMode === "week" && (
         <View className="flex-row justify-between mt-4">
           <Pressable
