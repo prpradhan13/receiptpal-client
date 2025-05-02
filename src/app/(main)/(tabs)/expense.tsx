@@ -12,6 +12,7 @@ import { TCategoryItems } from "@/src/types/expense.type";
 import CategoryItems from "@/src/components/expenses/CategoryItems";
 import { getMonthKey } from "@/src/utils/helpingFunc";
 import ExpenseMonthModal from "@/src/components/expenses/ExpenseMonthModal";
+import AddMoneyModal from "@/src/components/modals/AddMoneyModal";
 
 const Expense = () => {
   const [selectedMonth, setSelectedMonth] = useState("");
@@ -128,9 +129,11 @@ const Expense = () => {
             <Text className="text-white text-lg font-semibold">
               {balanceForMonth}
             </Text>
-            <Text className="text-[#c2c2c2] text-sm font-semibold">
-              Total Balance
-            </Text>
+            <View>
+              <Text className="text-[#c2c2c2] text-sm font-semibold">
+                Total Balance
+              </Text>
+            </View>
           </View>
 
           <DonutChart

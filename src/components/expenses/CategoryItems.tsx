@@ -102,8 +102,8 @@ const CategoryItems = ({ category, items, month }: CategoryItemsProps) => {
               key={`${item.itemName}-${idx}`}
               className="flex-row justify-between"
             >
-              <Text className="text-white">{item.itemName}</Text>
-              <Text className="text-white">{item.price}</Text>
+              <Text className="text-white capitalize font-medium text-lg">{item.itemName}</Text>
+              <Text className="text-white font-medium text-lg">{item.price}</Text>
             </View>
           ))}
         </Animated.View>

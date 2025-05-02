@@ -315,7 +315,6 @@ const CreateExpenseModal = () => {
                 multiline
                 placeholder="Any notes"
                 placeholderTextColor="#9ca3af"
-                keyboardType="numeric"
                 value={value?.toString()}
                 onChangeText={(text) => onChange(text)}
                 className="text-white rounded-xl px-4 py-3 text-lg" 

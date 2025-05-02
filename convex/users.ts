@@ -29,31 +29,44 @@ export const getUserByClerkId = query({
       .query("users")
       .filter((q) => q.eq(q.field("clerkId"), args.clerkId))
       .first();
-    
-      if (!userData) {
-        console.error("User not found!");
-        return;
-      };
+
+    if (!userData) {
+      console.error("User not found!");
+      return;
+    }
 
     return userData;
-  }
+  },
 });
 
 export const getUserMonthlyBalance = query({
   args: {
-    userId: v.id("users")
+    userId: v.id("users"),
   },
   handler: async (ctx, { userId }) => {
     const userBalance = await ctx.db
       .query("userMonthlyBalance")
       .filter((q) => q.eq(q.field("userId"), userId))
-      .collect()
-    
-      if (!userBalance) {
-        console.error("User not found!");
-        return;
-      };
+      .collect();
+
+    if (!userBalance) {
+      console.error("User not found!");
+      return;
+    }
 
     return userBalance;
-  }
-})
+  },
+});
+
+export const enterBalance = mutation({
+  args: {
+    userId: v.id("users"),
+    balance: v.number(),
+  },
+  handler: async (ctx, { balance, userId }) => {
+    await ctx.db.insert("userMonthlyBalance", {
+      balance,
+      userId,
+    });
+  },
+});

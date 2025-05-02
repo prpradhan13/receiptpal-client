@@ -18,6 +18,8 @@ interface WeeklyBarChartProps {
 
 const WeeklyBarChart = ({ data }: WeeklyBarChartProps) => {
   const [monthIndex, setMonthIndex] = useState(0);
+  const [viewMode, setViewMode] = useState<"month" | "week">("month");
+  const [weekOffset, setWeekOffset] = useState(0);
 
   const monthsWithData = useMemo(() => {
     const map = new Map<string, typeof data>();
@@ -48,25 +50,66 @@ const WeeklyBarChart = ({ data }: WeeklyBarChartProps) => {
   const rangeStart = currentMonthStart;
   const rangeEnd = currentMonthStart.endOf("month");
 
+  const currentWeekStart = useMemo(() => {
+    return dayjs().startOf("week").add(weekOffset, "week");
+  }, [weekOffset]);
+
+  const currentWeekEnd = useMemo(() => {
+    return currentWeekStart.endOf("week");
+  }, [currentWeekStart]);
+
+  const handlePrev = () => {
+    if (viewMode === "week") {
+      setWeekOffset((i) => i - 1);
+    } else if (viewMode === "month") {
+      setMonthIndex((i) => Math.max(i - 1, 0));
+    }
+  };
+  
+  const handleNext = () => {
+    if (viewMode === "week") {
+      setWeekOffset((i) => i + 1);
+    } else if (viewMode === "month") {
+      setMonthIndex((i) => Math.min(i + 1, monthsWithData.length - 1));
+    }
+  };
+
   const barData = useMemo(() => {
-    const dayTotals = Array(rangeEnd.date()).fill(0);
+    if (viewMode === "week") {
+      const dayTotals = Array(7).fill(0);
 
-    currentMonthData.forEach((item) => {
-      const dayOfMonth = dayjs(item.purchasedAt).date() - 1;
-      dayTotals[dayOfMonth] += item.price;
-    });
+      currentMonthData.forEach((item) => {
+        const date = dayjs(item.purchasedAt);
+        if (date.isBetween(currentWeekStart, currentWeekEnd, null, "[]")) {
+          const dayOfWeek = date.day(); // 0 = Sunday
+          dayTotals[dayOfWeek] += item.price;
+        }
+      });
 
-    return dayTotals.map((value, i) => ({
-      label: `${i + 1}`,
-      value,
-      frontColor: "#177AD5",
-    }));
-  }, [currentMonthData, rangeEnd]);
+      return dayTotals.map((value, i) => ({
+        label: dayjs().day(i).format("dd"), // 'Su', 'Mo', etc.
+        value,
+        frontColor: "#22d3ee",
+      }));
+    } else {
+      const dayTotals = Array(rangeEnd.date()).fill(0);
+      currentMonthData.forEach((item) => {
+        const dayOfMonth = dayjs(item.purchasedAt).date() - 1;
+        dayTotals[dayOfMonth] += item.price;
+      });
+
+      return dayTotals.map((value, i) => ({
+        label: `${i + 1}`,
+        value,
+        frontColor: "#177AD5",
+      }));
+    }
+  }, [viewMode, currentMonthData, rangeEnd]);
 
   return (
-    <View className="bg-[#2a2a2a] p-2 rounded-xl">
+    <View className="bg-[#2a2a2a] p-2 rounded-xl py-4">
       <Text className="text-2xl font-bold mb-4 text-white">
-        {rangeStart.format("MMM D")} - {rangeEnd.format("MMM D")}
+        {rangeStart.format("MMM D")} - {rangeEnd.format("D")}
       </Text>
 
       <BarChart
@@ -81,23 +124,39 @@ const WeeklyBarChart = ({ data }: WeeklyBarChartProps) => {
         yAxisTextStyle={{ color: "#fff" }}
       />
 
-      <View className="flex-row justify-between mt-4">
-        <Pressable
-          onPress={() => setMonthIndex((i) => i - 1)}
-          disabled={monthIndex === 0}
-          className={`${monthIndex === 0 ? "opacity-[0.4]" : "optional-[1]"} bg-[#c2c2c2] p-1 rounded-full`}
-        >
-          <Feather name="chevron-left" size={24} />
-        </Pressable>
+      <Pressable
+        onPress={() =>
+          setViewMode((prev) => (prev === "month" ? "week" : "month"))
+        }
+        className="absolute right-4 top-4 bg-white px-3 py-1 rounded-full"
+      >
+        <Text className="text-black font-semibold">
+          {viewMode === "month" ? "View Week" : "View Month"}
+        </Text>
+      </Pressable>
 
-        <Pressable
-          onPress={() => setMonthIndex((i) => i + 1)}
-          disabled={monthIndex === monthsWithData.length - 1}
-          className={`${monthIndex === monthsWithData.length - 1 ? "opacity-[0.4]" : "optional-[1]"} bg-[#c2c2c2] p-1 rounded-full`}
-        >
-          <Feather name="chevron-right" size={24} />
-        </Pressable>
-      </View>
+      {viewMode === "week" && (
+        <View className="flex-row justify-between mt-4">
+          <Pressable
+            onPress={handlePrev}
+            className="bg-[#c2c2c2] p-1 rounded-full"
+          >
+            <Feather name="chevron-left" size={24} />
+          </Pressable>
+
+          <Text className="text-white text-lg font-semibold">
+            {currentWeekStart.format("MMM D")} -{" "}
+            {currentWeekEnd.format("MMM D")}
+          </Text>
+
+          <Pressable
+            onPress={handleNext}
+            className="bg-[#c2c2c2] p-1 rounded-full"
+          >
+            <Feather name="chevron-right" size={24} />
+          </Pressable>
+        </View>
+      )}
     </View>
   );
 };
