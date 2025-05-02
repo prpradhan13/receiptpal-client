@@ -17,7 +17,7 @@ const TabLayout = () => {
         name="index"
         options={{
           headerShown: false,
-          tabBarLabel: "Home",
+          tabBarLabel: "",
           tabBarIcon: ({ color, size }) => (
             <Feather name="home" size={size} color={color} />
           ),
@@ -27,9 +27,19 @@ const TabLayout = () => {
         name="expense"
         options={{
           headerShown: false,
-          tabBarLabel: "Expense",
+          tabBarLabel: "",
           tabBarIcon: ({ color, size }) => (
             <FontAwesome name="rupee" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="receiptScanner"
+        options={{
+          headerShown: false,
+          tabBarLabel: "",
+          tabBarIcon: ({ color, size }) => (
+            <Feather name="file-text" size={size} color={color} />
           ),
         }}
       />
@@ -37,7 +47,7 @@ const TabLayout = () => {
         name="profile"
         options={{
           headerShown: false,
-          tabBarLabel: "Profile",
+          tabBarLabel: "",
           tabBarIcon: ({ color, size }) => (
             <Feather name="user" size={size} color={color} />
           ),

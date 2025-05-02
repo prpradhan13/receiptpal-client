@@ -1,7 +1,5 @@
-import { View, Text, ScrollView, Pressable, Modal } from "react-native";
+import { View, Text, ScrollView, Pressable } from "react-native";
 import React, { useEffect, useMemo, useState } from "react";
-import { useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
 import { useAuthContext } from "@/src/context/AuthProvider";
 import DefaultLoader from "@/src/components/loaders/DefaultLoader";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -16,6 +14,11 @@ import Feather from "@expo/vector-icons/Feather";
 import BalanceDropdown from "@/src/components/expenses/BalanceDropdown";
 import { formatCurrency } from "@/src/utils/helpingFunc";
 import { _layout, AnimatedPressable } from "@/src/constants/Animation";
+import { useTransactionStore } from "@/src/store/TransactionStore";
+import {
+  groupedExpensesFunc,
+  grpByCategoryReducer,
+} from "@/src/utils/expenseHelper";
 
 const Expense = () => {
   const [selectedMonth, setSelectedMonth] = useState("");
@@ -23,44 +26,21 @@ const Expense = () => {
   const [openBalanceCategoryBox, setOpenBalanceCategoryBox] = useState(false);
 
   const { userId, monthlyBalance } = useAuthContext();
+  const { allExpenses: expenseQueryData } = useTransactionStore();
+
   const balanceForMonth =
     (selectedMonth && monthlyBalance?.[selectedMonth]) || 0;
 
   const [showBalance, setShowBalance] = useState(balanceForMonth);
 
-  const expenseQueryData = useQuery(
-    api.expenseData.getUsersAllExpenses,
-    userId ? { userId } : "skip"
-  );
-
   const isLoading = !userId || expenseQueryData === undefined;
 
   // Group expenses by month
-  const groupedExpenses = useMemo(() => {
-    if (!expenseQueryData) return [];
+  const groupedExpenses = useMemo(
+    () => groupedExpensesFunc(expenseQueryData),
+    [expenseQueryData]
+  );
 
-    const grpObject = expenseQueryData.reduce<
-      Record<string, typeof expenseQueryData>
-    >((acc, expense) => {
-      const monthKey = getMonthKey(new Date(expense.purchasedAt));
-
-      if (!acc[monthKey]) {
-        acc[monthKey] = [];
-      }
-
-      acc[monthKey].push(expense);
-      return acc;
-    }, {});
-
-    return Object.entries(grpObject)
-      .sort(([a], [b]) => (dayjs(b).isAfter(dayjs(a)) ? 1 : -1))
-      .map(([month, expenses]) => ({
-        month,
-        expenses,
-      }));
-  }, [expenseQueryData]);
-
-  // Set default to latest month
   useEffect(() => {
     if (groupedExpenses.length > 0 && !selectedMonth) {
       setSelectedMonth(groupedExpenses[0].month);
@@ -73,7 +53,6 @@ const Expense = () => {
     }
   }, [selectedMonth]);
 
-  // Filter for selected month
   const filteredExpenses = useMemo(() => {
     if (!expenseQueryData || !selectedMonth) return [];
 
@@ -83,26 +62,7 @@ const Expense = () => {
     });
   }, [expenseQueryData, selectedMonth]);
 
-  // Group by category
-  const grpByCategory = filteredExpenses.reduce<
-    Record<string, TCategoryItems[]>
-  >((acc, expense) => {
-    const categoryKey = expense.category || "Uncategorized";
-
-    const item: TCategoryItems = {
-      itemName: expense.itemName,
-      price: expense.price,
-      purchasedAt: expense.purchasedAt,
-    };
-
-    if (!acc[categoryKey]) {
-      acc[categoryKey] = [];
-    }
-
-    acc[categoryKey].push(item);
-
-    return acc;
-  }, {});
+  const grpByCategory = filteredExpenses.reduce<Record<string, TCategoryItems[]>>(grpByCategoryReducer, {});
 
   const categoryArray = Object.entries(grpByCategory).map(
     ([category, items]) => ({
@@ -112,13 +72,13 @@ const Expense = () => {
   );
 
   const totalSpend = useMemo(() => {
-    return filteredExpenses.reduce((sum, e) => sum + (e.price || 0), 0);
+    return filteredExpenses.reduce((sum, e) => sum + (e.total || 0), 0);
   }, [filteredExpenses]);
 
   const remainingBalance = balanceForMonth - totalSpend;
 
   const weeklyBarData = filteredExpenses.map((e) => ({
-    price: e.price,
+    price: e.total,
     purchasedAt: e.purchasedAt,
   }));
 
