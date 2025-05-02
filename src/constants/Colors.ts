@@ -23,12 +23,14 @@ export const Colors = {
 };
 
 export const categoryColorMap: Record<string, string> = {
-  food: "#38b000", // Green
-  entertainment: "#60a5fa", // Blue
-  travel: "#facc15", // Yellow
-  shopping: "#f472b6", // Pink
-  utilities: "#a78bfa", // Purple
-  uncategorized: "#9ca3af", // Gray
+  food: "#38b000",
+  travel: "#ff6700",
+  shopping: "#00509d",
+  utilities: "#7b2cbf",
+  gift: "#9d4edd",
+  invest: "#006400",
+  emi: "#9a031e",
+  uncategorized: "#9ca3af",
 };
 
 export const categoryData = [
@@ -40,21 +42,39 @@ export const categoryData = [
   },
   {
     cName: "travel",
-    color: "#facc15",
+    color: "#ff6700",
     iconComponent: Feather,
     iconProps: { name: "map", size: 24, color: "black" },
   },
   {
     cName: "shopping",
-    color: "#f472b6",
+    color: "#00509d",
     iconComponent: Feather,
     iconProps: { name: "shopping-bag", size: 24, color: "black" },
   },
   {
     cName: "utilities",
-    color: "#a78bfa",
+    color: "#7b2cbf",
     iconComponent: Feather,
     iconProps: { name: "slack", size: 24, color: "black" },
+  },
+  {
+    cName: "gift",
+    color: "#9d4edd",
+    iconComponent: Feather,
+    iconProps: { name: "gift", size: 24, color: "black" },
+  },
+  {
+    cName: "invest",
+    color: "#006400",
+    iconComponent: Feather,
+    iconProps: { name: "activity", size: 24, color: "black" },
+  },
+  {
+    cName: "emi",
+    color: "#9a031e",
+    iconComponent: Feather,
+    iconProps: { name: "credit-card", size: 24, color: "black" },
   },
   {
     cName: "uncategorized",

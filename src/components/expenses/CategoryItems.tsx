@@ -15,6 +15,8 @@ import {
 import { categoryColorMap } from "@/src/constants/Colors";
 import { useEffect } from "react";
 import { useAuthContext } from "@/src/context/AuthProvider";
+import { categoryData } from "@/src/constants/Colors";
+import { formatCurrency } from "@/src/utils/helpingFunc";
 
 interface CategoryItemsProps {
   month: string;
@@ -29,27 +31,13 @@ interface CategoryItemsProps {
 const CategoryItems = ({ category, items, month }: CategoryItemsProps) => {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const { monthlyBalance } = useAuthContext();
-  const totalBalance = month ? monthlyBalance[month] || 0 : 0
+  const totalBalance = month ? monthlyBalance[month] || 0 : 0;
 
   const isOpen = expanded[category];
-  const progress = useSharedValue(0);
-  const opacity = useSharedValue(isOpen ? 0 : 1);
 
   const categoryTotal = items.reduce((sum, item) => sum + (item.price || 0), 0);
-  const percentUsed = Math.min((categoryTotal / totalBalance) * 100, 100);
-  const categoryColor = categoryColorMap[category] || "#6b7280";
-
-  useEffect(() => {
-    progress.value = withTiming(percentUsed, { duration: 600 });
-    opacity.value = withTiming(isOpen ? 0 : 1, { duration: 300 });
-  }, [isOpen]);
-
-  const animatedBarStyle = useAnimatedStyle(() => {
-    return {
-      width: `${progress.value}%`,
-      opacity: opacity.value,
-    };
-  });
+  const percentUsed =
+    totalBalance > 0 ? Math.min((categoryTotal / totalBalance) * 100, 100) : 0;
 
   const toggleCategory = (category: string) => {
     setExpanded((prev) => ({
@@ -58,37 +46,40 @@ const CategoryItems = ({ category, items, month }: CategoryItemsProps) => {
     }));
   };
 
-  return (
-    <Animated.View
-      layout={_layout}
-      className="mb-3 rounded-xl overflow-hidden p-3"
-    >
-      {!isOpen && (
-        <View className="absolute left-0 right-0 top-0 bottom-0 bg-white/10">
-          <Animated.View
-            style={[{ backgroundColor: categoryColor }, animatedBarStyle]}
-            className="h-full opacity-30"
-          />
-        </View>
-      )}
+  const cData = categoryData.filter((c) => c.cName === category);
+  const IconComponent = cData[0].iconComponent;
 
+  return (
+    <Animated.View layout={_layout} className="mb-5 rounded-xl overflow-hidden">
       <AnimatedPressable
         layout={_layout}
-        className="flex-row justify-between items-center"
+        className="flex-row justify-between"
         onPress={() => toggleCategory(category)}
       >
         <View className="flex-row gap-2 items-center">
-          <Feather
-            name={isOpen ? "chevron-up" : "chevron-down"}
-            color={"#fff"}
-            size={24}
-          />
-          <Text className="text-white text-2xl font-medium capitalize">
-            {category}
-          </Text>
+          <View
+            className="p-4 rounded-full"
+            style={{ backgroundColor: cData[0].color }}
+          >
+            {IconComponent && (
+              <IconComponent
+                {...cData[0].iconProps}
+                name={cData[0].iconProps?.name as any}
+                color={"#fff"}
+              />
+            )}
+          </View>
+          <View>
+            <Text className="text-white text-2xl font-medium capitalize">
+              {category}
+            </Text>
+            <Text className="text-[#c2c2c2] font-medium capitalize">
+              {Math.round(percentUsed)}%
+            </Text>
+          </View>
         </View>
 
-        <Text className="text-white text-2xl font-medium">{categoryTotal}</Text>
+        <Text className="text-white text-2xl font-medium">{formatCurrency(categoryTotal)}</Text>
       </AnimatedPressable>
 
       {isOpen && (
@@ -102,8 +93,12 @@ const CategoryItems = ({ category, items, month }: CategoryItemsProps) => {
               key={`${item.itemName}-${idx}`}
               className="flex-row justify-between"
             >
-              <Text className="text-white capitalize font-medium text-lg">{item.itemName}</Text>
-              <Text className="text-white font-medium text-lg">{item.price}</Text>
+              <Text className="text-white capitalize font-medium text-lg">
+                {item.itemName}
+              </Text>
+              <Text className="text-white font-medium text-lg">
+                {item.price}
+              </Text>
             </View>
           ))}
         </Animated.View>

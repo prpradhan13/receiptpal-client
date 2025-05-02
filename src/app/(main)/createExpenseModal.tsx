@@ -49,7 +49,6 @@ const CreateExpenseModal = () => {
     control,
     reset,
     formState: { errors },
-    getValues,
     handleSubmit,
     setValue,
     watch,
@@ -147,6 +146,7 @@ const CreateExpenseModal = () => {
                     React.createElement(selectedCategoryData.iconComponent, {
                       ...selectedCategoryData.iconProps,
                       name: selectedCategoryData.iconProps.name as any,
+                      color: "#fff"
                     })}
                   <Text className="text-white capitalize text-lg font-medium">
                     {selectedCategory || "Select one"}
