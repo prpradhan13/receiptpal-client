@@ -12,13 +12,21 @@ import { TCategoryItems } from "@/src/types/expense.type";
 import CategoryItems from "@/src/components/expenses/CategoryItems";
 import { getMonthKey } from "@/src/utils/helpingFunc";
 import ExpenseMonthModal from "@/src/components/expenses/ExpenseMonthModal";
-import AddMoneyModal from "@/src/components/modals/AddMoneyModal";
+import Feather from "@expo/vector-icons/Feather";
+import BalanceDropdown from "@/src/components/expenses/BalanceDropdown";
+import { formatCurrency } from "@/src/utils/helpingFunc";
+import { _layout, AnimatedPressable } from "@/src/constants/Animation";
 
 const Expense = () => {
   const [selectedMonth, setSelectedMonth] = useState("");
   const [showMonthPicker, setShowMonthPicker] = useState(false);
+  const [openBalanceCategoryBox, setOpenBalanceCategoryBox] = useState(false);
 
   const { userId, monthlyBalance } = useAuthContext();
+  const balanceForMonth =
+    (selectedMonth && monthlyBalance?.[selectedMonth]) || 0;
+
+  const [showBalance, setShowBalance] = useState(balanceForMonth);
 
   const expenseQueryData = useQuery(
     api.expenseData.getUsersAllExpenses,
@@ -58,6 +66,12 @@ const Expense = () => {
       setSelectedMonth(groupedExpenses[0].month);
     }
   }, [groupedExpenses, selectedMonth]);
+
+  useEffect(() => {
+    if (selectedMonth) {
+      setShowBalance(balanceForMonth);
+    }
+  }, [selectedMonth]);
 
   // Filter for selected month
   const filteredExpenses = useMemo(() => {
@@ -101,15 +115,15 @@ const Expense = () => {
     return filteredExpenses.reduce((sum, e) => sum + (e.price || 0), 0);
   }, [filteredExpenses]);
 
+  const remainingBalance = balanceForMonth - totalSpend;
+
   const weeklyBarData = filteredExpenses.map((e) => ({
     price: e.price,
     purchasedAt: e.purchasedAt,
   }));
 
-  const balanceForMonth =
-    (selectedMonth && monthlyBalance?.[selectedMonth]) || 0;
-
-  if (isLoading) return <DefaultLoader />;
+  if (isLoading || (groupedExpenses.length > 0 && !selectedMonth))
+    return <DefaultLoader />;
 
   return (
     <SafeAreaView className="flex-1 p-3">
@@ -125,15 +139,32 @@ const Expense = () => {
           </Pressable>
 
           {/* Balance Details */}
-          <View className="justify-center items-center">
-            <Text className="text-white text-lg font-semibold">
-              {balanceForMonth}
-            </Text>
-            <View>
-              <Text className="text-[#c2c2c2] text-sm font-semibold">
-                Total Balance
+          <View className="relative">
+            <AnimatedPressable
+              layout={_layout}
+              onPress={() => setOpenBalanceCategoryBox((prev) => !prev)}
+              className="justify-center items-center"
+            >
+              <Text className="text-white text-lg font-semibold">
+                {formatCurrency(showBalance)}
               </Text>
-            </View>
+              <View className="flex-row gap-1 items-center">
+                <Text className="text-[#c2c2c2] text-sm font-semibold">
+                  This month
+                </Text>
+
+                <Feather name="chevron-down" color={"#c2c2c2"} size={14} />
+              </View>
+            </AnimatedPressable>
+
+            {openBalanceCategoryBox && (
+              <BalanceDropdown
+                monthlyBalance={balanceForMonth}
+                remainingBalance={remainingBalance}
+                setShowBalance={setShowBalance}
+                closeDropdown={() => setOpenBalanceCategoryBox(false)}
+              />
+            )}
           </View>
 
           <DonutChart

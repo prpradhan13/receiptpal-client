@@ -52,7 +52,7 @@ export default function AuthProvider({
   }, 0)
 
   const MBalance = userBalance?.reduce<Record<string, number>>((acc, item) => {
-    const date = new Date(item._creationTime);
+    const date = new Date(item.month);
     const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
 
     if (!acc[monthKey]) {

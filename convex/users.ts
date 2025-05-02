@@ -62,11 +62,13 @@ export const enterBalance = mutation({
   args: {
     userId: v.id("users"),
     balance: v.number(),
+    month: v.number(),
   },
-  handler: async (ctx, { balance, userId }) => {
+  handler: async (ctx, { balance, userId, month }) => {
     await ctx.db.insert("userMonthlyBalance", {
       balance,
       userId,
+      month
     });
   },
 });

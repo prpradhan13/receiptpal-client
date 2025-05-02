@@ -12,6 +12,7 @@ export default defineSchema({
   userMonthlyBalance: defineTable({
     userId: v.id("users"),
     balance: v.number(),
+    month: v.number(),
   }).index("by_user_id", ["userId"]),
 
   receipts: defineTable({
